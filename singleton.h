@@ -18,6 +18,7 @@ public:
 
     std::unique_ptr<Synapse> createSynapse() { return std::unique_ptr<Synapse>(new Synapse()); }
     std::unique_ptr<Neuron> createNeuron() { return std::unique_ptr<Neuron>(new Neuron()); }
+    std::unique_ptr<BiasNeuron> createBiasNeuron() { return std::unique_ptr<BiasNeuron>(new BiasNeuron()); }
 };
 
 

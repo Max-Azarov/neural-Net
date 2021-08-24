@@ -78,4 +78,25 @@ private:
     ItemList c_itemList;
 };
 
+
+// Реализация синапса
+class BiasNeuron : public Item
+{
+public:
+    virtual void forwardAction() override {}
+    virtual void backwardAction() override {}
+
+    virtual void addItem( Item*) override {}
+    virtual void removeItem( Item*) override {}
+    virtual const ItemList& getListItem() override { return c_itemList; }
+    virtual ITEM_TYPE getType() override { return BIAS_NEURON;}
+
+public:
+    BiasNeuron() : c_itemList() {}
+    virtual ~BiasNeuron() {}
+
+private:
+    ItemList c_itemList;
+};
+
 #endif // ITEM_H
