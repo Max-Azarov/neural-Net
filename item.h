@@ -5,6 +5,9 @@
 #include <list>
 #include <memory>
 
+#include "logwrite.h"
+
+
 enum ITEM_TYPE {
     SYNAPSE,
     NEURON,
@@ -41,17 +44,17 @@ public:
 class Synapse : public Item
 {
 public:
-    virtual void forwardAction() override {}
-    virtual void backwardAction() override {}
+    void forwardAction() override;
+    void backwardAction() override;
 
-    virtual void addItem( Item*) override {}
-    virtual void removeItem( Item*) override {}
-    virtual const ItemList& getListItem() override { return c_itemList; }
-    virtual ITEM_TYPE getType() override { return SYNAPSE;}
+    void addItem( Item*) override;
+    void removeItem( Item*) override;
+    const ItemList& getListItem() override { return c_itemList; }
+    ITEM_TYPE getType() override { return SYNAPSE;}
 
 public:
-    Synapse() : c_itemList() {}
-    virtual ~Synapse() {}
+    Synapse();
+    ~Synapse();
 
 private:
     ItemList c_itemList;
@@ -62,17 +65,17 @@ private:
 class Neuron : public Item
 {
 public:
-    virtual void forwardAction() override {}
-    virtual void backwardAction() override {}
+    void forwardAction() override;
+    void backwardAction() override;
 
-    virtual void addItem( Item*) override {}
-    virtual void removeItem( Item*) override {}
-    virtual const ItemList& getListItem() override { return c_itemList; }
+    void addItem( Item*) override;
+    void removeItem( Item*) override;
+    ItemList& getListItem() override { return c_itemList; }
     virtual ITEM_TYPE getType() override { return NEURON;}
 
 public:
-    Neuron() : c_itemList() {}
-    virtual ~Neuron() {}
+    Neuron();
+    ~Neuron();
 
 private:
     ItemList c_itemList;
@@ -83,17 +86,38 @@ private:
 class BiasNeuron : public Item
 {
 public:
-    virtual void forwardAction() override {}
-    virtual void backwardAction() override {}
+    void forwardAction() override;
+    void backwardAction() override;
 
-    virtual void addItem( Item*) override {}
-    virtual void removeItem( Item*) override {}
-    virtual const ItemList& getListItem() override { return c_itemList; }
-    virtual ITEM_TYPE getType() override { return BIAS_NEURON;}
+    void addItem( Item*) override;
+    void removeItem( Item*) override;
+    const ItemList& getListItem() override { return c_itemList; }
+    ITEM_TYPE getType() override { return BIAS_NEURON;}
 
 public:
-    BiasNeuron() : c_itemList() {}
-    virtual ~BiasNeuron() {}
+    BiasNeuron();
+    ~BiasNeuron();
+
+private:
+    ItemList c_itemList;
+};
+
+
+
+class OutputNeuron : public Item
+{
+public:
+    void forwardAction() override;
+    void backwardAction() override;
+
+    void addItem( Item*) override;
+    void removeItem( Item*) override;
+    const ItemList& getListItem() override { return c_itemList; }
+    ITEM_TYPE getType() override { return OUTPUT_NEURON;}
+
+public:
+    OutputNeuron();
+    ~OutputNeuron();
 
 private:
     ItemList c_itemList;
