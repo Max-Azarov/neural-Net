@@ -14,12 +14,12 @@ enum ITEM_TYPE {
 };
 
 
-// Называем тип контейнера
+
 class Item;
 using ItemList = std::list<std::unique_ptr<Item>>;
 
 
-// Интерфейс составной части композиции
+
 class Item
 {
 public:
@@ -37,7 +37,7 @@ public:
 
 
 
-// Реализация синапса
+
 class Synapse : public Item
 {
 public:
@@ -58,7 +58,7 @@ private:
 };
 
 
-// Реализация синапса
+
 class Neuron : public Item
 {
 public:
@@ -79,7 +79,7 @@ private:
 };
 
 
-// Реализация синапса
+
 class BiasNeuron : public Item
 {
 public:
