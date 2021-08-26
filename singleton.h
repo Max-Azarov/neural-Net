@@ -20,6 +20,7 @@ public:
     std::unique_ptr<Neuron> createNeuron() { return std::unique_ptr<Neuron>(new Neuron()); }
     std::unique_ptr<BiasNeuron> createBiasNeuron() { return std::unique_ptr<BiasNeuron>(new BiasNeuron()); }
     std::unique_ptr<OutputNeuron> createOutputNeuron() { return std::unique_ptr<OutputNeuron>(new OutputNeuron()); }
+    std::unique_ptr<InputNode> createInputNode() { return std::unique_ptr<InputNode>(new InputNode()); }
 };
 
 

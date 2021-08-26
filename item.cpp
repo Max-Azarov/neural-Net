@@ -1,6 +1,26 @@
 #include "item.h"
 
 
+//==========================================================
+void InputNode::forwardAction() {}
+void InputNode::backwardAction() {}
+
+void InputNode::addItem( Item*) {}
+void InputNode::removeItem( Item*) {}
+
+InputNode::InputNode()
+    : c_itemList()
+{
+    LOGWRITE("Create InputNode");
+}
+
+InputNode::~InputNode()
+{
+    LOGWRITE("Delete InputNode");
+}
+
+
+
 //=========================================================
 void Synapse::forwardAction() {}
 void Synapse::backwardAction() {}
@@ -10,6 +30,7 @@ void Synapse::removeItem( Item*) {}
 
 Synapse::Synapse()
     : c_itemList()
+    , p_impl( new SynapseImpl())
 {
     LOGWRITE("Create Synapse");
 }
@@ -30,6 +51,7 @@ void Neuron::removeItem( Item*) {}
 
 Neuron::Neuron()
     : c_itemList()
+    , p_impl( new NeuronImpl())
 {
     LOGWRITE("Create Neuron");
 }
@@ -50,6 +72,7 @@ void BiasNeuron::removeItem( Item*) {}
 
 BiasNeuron::BiasNeuron()
     : c_itemList()
+    , p_impl( new BiasNeuronImpl())
 {
     LOGWRITE("Create BiasNeuron");
 }
@@ -58,6 +81,7 @@ BiasNeuron::~BiasNeuron()
 {
     LOGWRITE("Delete BiasNeuron");
 }
+
 
 
 //==========================================================
@@ -69,6 +93,7 @@ void OutputNeuron::removeItem( Item*) {}
 
 OutputNeuron::OutputNeuron()
     : c_itemList()
+    , p_impl( new OutputNeuronImpl())
 {
     LOGWRITE("Create OutputNeuron");
 }

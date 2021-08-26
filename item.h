@@ -15,10 +15,11 @@ enum ITEM_TYPE {
     INPUT_NEURON,
     OUTPUT_NEURON,
     BIAS_NEURON,
+    INPUT_NODE,
 };
 
 
-
+//==========================================================
 class Item;
 using ItemList = std::list<std::unique_ptr<Item>>;
 
@@ -41,7 +42,30 @@ public:
 
 
 
+//==========================================================
+class InputNode : public Item
+{
+public:
+    void forwardAction() override;
+    void backwardAction() override;
 
+    void addItem( Item*) override;
+    void removeItem( Item*) override;
+    const ItemList& getListItem() override { return c_itemList; }
+    ITEM_TYPE getType() override { return INPUT_NODE;}
+
+public:
+    InputNode();
+    ~InputNode();
+
+private:
+    ItemList c_itemList;
+
+};
+
+
+
+//==========================================================
 class Synapse : public Item
 {
 public:
@@ -59,10 +83,12 @@ public:
 
 private:
     ItemList c_itemList;
+    std::unique_ptr<SynapseImpl> p_impl;
 };
 
 
 
+//==========================================================
 class Neuron : public Item
 {
 public:
@@ -80,10 +106,12 @@ public:
 
 private:
     ItemList c_itemList;
+    std::unique_ptr<NeuronImpl> p_impl;
 };
 
 
 
+//==========================================================
 class BiasNeuron : public Item
 {
 public:
@@ -101,10 +129,12 @@ public:
 
 private:
     ItemList c_itemList;
+    std::unique_ptr<BiasNeuronImpl> p_impl;
 };
 
 
 
+//==========================================================
 class OutputNeuron : public Item
 {
 public:
@@ -122,6 +152,7 @@ public:
 
 private:
     ItemList c_itemList;
+    std::unique_ptr<OutputNeuronImpl> p_impl;
 };
 
 #endif // ITEM_H

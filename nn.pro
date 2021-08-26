@@ -12,4 +12,6 @@ HEADERS += \
     item.h \
     itemImpl.h \
     logwrite.h \
+    netConfiguration.h \
+    netHolder.h \
     singleton.h
