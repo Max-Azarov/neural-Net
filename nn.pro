@@ -5,9 +5,11 @@ CONFIG -= qt
 
 SOURCES += \
     item.cpp \
+    itemImpl.cpp \
     main.cpp
 
 HEADERS += \
     item.h \
+    itemImpl.h \
     logwrite.h \
     singleton.h

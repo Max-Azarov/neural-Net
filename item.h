@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "logwrite.h"
+#include "itemImpl.h"
 
 
 enum ITEM_TYPE {
