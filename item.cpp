@@ -42,13 +42,13 @@ ITEM_TYPE Item::getType() { return BASIC_ITEM; }
 InputNode::InputNode()
     : Item()
 {
-    LOGWRITE("Create InputNode");
+    LOGWRITE_TEXT("Create InputNode\n");
 }
 
 
 InputNode::~InputNode()
 {
-    LOGWRITE("Delete InputNode");
+    LOGWRITE_TEXT("Delete InputNode\n");
 }
 
 
@@ -67,13 +67,15 @@ Synapse::Synapse()
     : Item()
     , p_impl( new SynapseImpl())
 {
-    LOGWRITE("Create Synapse");
+    LOGWRITE_TEXT("Create Synapse: ");
+    LOGWRITE_VALUE( this);
 }
 
 
 Synapse::~Synapse()
 {
-    LOGWRITE("Delete Synapse");
+    LOGWRITE_TEXT("Delete Synapse: ");
+    LOGWRITE_VALUE( this);
 }
 
 
@@ -91,13 +93,13 @@ Neuron::Neuron()
     : Item()
     , p_impl( new NeuronImpl())
 {
-    LOGWRITE("Create Neuron");
+    LOGWRITE_TEXT("Create Neuron\n");
 }
 
 
 Neuron::~Neuron()
 {
-    LOGWRITE("Delete Neuron");
+    LOGWRITE_TEXT("Delete Neuron\n");
 }
 
 
@@ -117,13 +119,13 @@ BiasNeuron::BiasNeuron()
     : Item()
     , p_impl( new BiasNeuronImpl())
 {
-    LOGWRITE("Create BiasNeuron");
+    LOGWRITE_TEXT("Create BiasNeuron\n");
 }
 
 
 BiasNeuron::~BiasNeuron()
 {
-    LOGWRITE("Delete BiasNeuron");
+    LOGWRITE_TEXT("Delete BiasNeuron\n");
 }
 
 
@@ -142,13 +144,13 @@ OutputNeuron::OutputNeuron()
     : Item()
     , p_impl( new OutputNeuronImpl())
 {
-    LOGWRITE("Create OutputNeuron");
+    LOGWRITE_TEXT("Create OutputNeuron\n");
 }
 
 
 OutputNeuron::~OutputNeuron()
 {
-    LOGWRITE("Delete OutputNeuron");
+    LOGWRITE_TEXT("Delete OutputNeuron\n");
 }
 
 
@@ -169,13 +171,13 @@ InputNeuron::InputNeuron()
     : Item()
     , p_impl( new InputNeuronImpl())
 {
-    LOGWRITE("Create InputNeuron");
+    LOGWRITE_TEXT("Create InputNeuron\n");
 }
 
 
 InputNeuron::~InputNeuron()
 {
-    LOGWRITE("Delete InputNeuron");
+    LOGWRITE_TEXT("Delete InputNeuron\n");
 }
 
 

@@ -29,7 +29,7 @@ enum ITEM_TYPE {
 //==========================================================
 class Item;
 
-using itemPtr_t = std::unique_ptr<Item>;
+using itemPtr_t = std::shared_ptr<Item>;
 using itemPtrList_t = std::list<Item*>;
 using itemSmartPtrList_t = std::list<itemPtr_t>;
 using location_t = std::pair<unsigned int, unsigned int>;

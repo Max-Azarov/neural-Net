@@ -54,7 +54,7 @@ public:
 
 private:
     void createNeurons_( const netConfiguration_t& );
-    void createAndAddSynapses_( const netConfiguration_t& );
+    void createAndAddSynapses_();
 
 private:
     itemPtr_t p_node;

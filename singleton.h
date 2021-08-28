@@ -22,8 +22,8 @@ public:
         return *s.get();
     }
 
-    Singleton() { LOGWRITE("create Singleton"); }
-    ~Singleton() { LOGWRITE("delete Singleton"); }
+    Singleton() { LOGWRITE_TEXT("create Singleton\n"); }
+    ~Singleton() { LOGWRITE_TEXT("delete Singleton\n"); }
 
     itemPtr_t createSynapse() { return itemPtr_t( new Synapse()); }
     itemPtr_t createNeuron() { return itemPtr_t( new Neuron()); }

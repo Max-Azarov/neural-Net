@@ -7,10 +7,13 @@
 
 #ifdef LOG
 #include <iostream>
-#define LOGWRITE( text) std::cout << __FILE__ << ":" << __LINE__ << "  " << #text << ": " << text << std::endl
+#include <string>
+#define LOGWRITE_TEXT( text) std::cout << std::string(__FILE__).substr( std::string(__FILE__).find_last_of("\\/") + 1) << ":" << __LINE__ << "\t" << text << std::flush
+#define LOGWRITE_VALUE( value) std::cout << std::string(__FILE__).substr( std::string(__FILE__).find_last_of("\\/") + 1) << ":" << __LINE__ << "\t" << #value << ": " << value << std::endl
 
 #else
-#define LOGWRITE( text) //
+#define LOGWRITE_TEXT( text) //
+#define LOGWRITE_VALUE( value) //
 #endif
 
 
@@ -19,7 +22,7 @@
 
 #ifdef CONSOL
 #include <iostream>
-#define CONSOL_OUT( text) std::cout << __FILE__ << ":" << __LINE__ << "  " << #text << ": " << text << std::endl
+#define CONSOL_OUT( text) std::cout << std::string(__FILE__).substr( std::string(__FILE__).find_last_of("\\/") + 1) << ":" << __LINE__ << "\t" << #text << ": " << text << std::endl
 
 #else
 #define CONSOL( text) //
