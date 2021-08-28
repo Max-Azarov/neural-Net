@@ -1,19 +1,22 @@
 #include "logwrite.h"
-#include "singleton.h"
+#include "netHolder.h"
+#include "netConfiguration.h"
+
 
 #include <memory>
 
 int main()
 {
-    std::unique_ptr<Synapse> synapse = Singleton::instance().createSynapse();
-    std::unique_ptr<Neuron> neuron = Singleton::instance().createNeuron();
-    std::unique_ptr<BiasNeuron> biasNeuron = Singleton::instance().createBiasNeuron();
-    std::unique_ptr<OutputNeuron> outputNeuron = Singleton::instance().createOutputNeuron();
-    std::unique_ptr<InputNode> InputNode = Singleton::instance().createInputNode();
-    LOGWRITE(synapse->getType());
-    LOGWRITE(neuron->getType());
-    LOGWRITE(biasNeuron->getType());
-    LOGWRITE(outputNeuron->getType());
-    LOGWRITE(InputNode->getType());
+    Neural::NetHolder netHolder;
+
+
+    Neural::netConfiguration_t netConfig;
+
+    netConfig.emplace_back( Neural::LayerConfig(2, Neural::NON_TYPE));
+    netConfig.emplace_back( Neural::LayerConfig(2, Neural::SIGMOID));
+    netConfig.emplace_back( Neural::LayerConfig(1, Neural::SIGMOID));
+
+    netHolder.createNet( netConfig);
+
     return 0;
 }

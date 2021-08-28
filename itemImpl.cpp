@@ -1,6 +1,6 @@
 #include "itemImpl.h"
 
-
+using namespace Neural;
 
 //==========================================================
 SynapseImpl::SynapseImpl()
@@ -49,6 +49,19 @@ OutputNeuronImpl::OutputNeuronImpl()
 
 
 OutputNeuronImpl::~OutputNeuronImpl()
+{
+
+}
+
+
+//==========================================================
+InputNeuronImpl::InputNeuronImpl()
+{
+
+}
+
+
+InputNeuronImpl::~InputNeuronImpl()
 {
 
 }

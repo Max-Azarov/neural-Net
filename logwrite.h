@@ -1,5 +1,8 @@
 #pragma once
 
+
+
+// =============================================================
 #define LOG
 
 #ifdef LOG
@@ -8,5 +11,17 @@
 
 #else
 #define LOGWRITE( text) //
+#endif
 
-#endif // LOGWRITE_H
+
+// =============================================================
+#define CONSOL
+
+#ifdef CONSOL
+#include <iostream>
+#define CONSOL_OUT( text) std::cout << __FILE__ << ":" << __LINE__ << "  " << #text << ": " << text << std::endl
+
+#else
+#define CONSOL( text) //
+
+#endif

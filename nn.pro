@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += \
     item.cpp \
     itemImpl.cpp \
-    main.cpp
+    main.cpp \
+    netHolder.cpp
 
 HEADERS += \
     item.h \

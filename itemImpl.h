@@ -2,6 +2,8 @@
 #define ITEMIMPL_H
 
 
+namespace Neural {
+
 
 
 
@@ -62,5 +64,23 @@ public:
 private:
 
 };
+
+
+
+class InputNeuronImpl
+{
+public:
+
+
+public:
+    InputNeuronImpl();
+    ~InputNeuronImpl();
+
+private:
+
+};
+
+
+} // namespace Neural
 
 #endif // ITEMIMPL_H

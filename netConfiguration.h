@@ -3,6 +3,8 @@
 
 #include <vector>
 
+namespace Neural {
+
 
 
 
@@ -15,6 +17,7 @@ enum NET_TYPE
 
 enum NEURON_TYPE_ACTIVATION
 {
+    NON_TYPE,
     SIGMOID,
     RELU,
 };
@@ -31,25 +34,29 @@ struct LayerConfig
         : numOfNeuron()
         , activationType(SIGMOID)
     {}
-};
 
 
-
-struct NetConfiguration
-{
-    unsigned int numOfInputs;
-    unsigned int numOfOutputs;
-    std::vector<LayerConfig> neuronActivationType; // Определяет количество скрытых слоев и тип активации каждого из слоев
-
-
-    NetConfiguration()
-        : numOfInputs()
-        , numOfOutputs()
-        , neuronActivationType()
+    LayerConfig( unsigned int num, NEURON_TYPE_ACTIVATION act = SIGMOID)
+        : numOfNeuron(num)
+        , activationType(act)
     {}
 };
 
 
+using netConfiguration_t = std::vector<LayerConfig>;
 
+
+struct NetConfiguration
+{
+    std::vector<LayerConfig> neuronActivationType; // Определяет количество слоев и тип активации каждого из слоев
+
+
+    NetConfiguration( )
+        : neuronActivationType()
+    {}
+};
+
+
+} // namespace Neural
 
 #endif // NETCONFIGURATION_H

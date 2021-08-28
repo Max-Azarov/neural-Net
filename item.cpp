@@ -1,18 +1,50 @@
 #include "item.h"
 
 
+using namespace Neural;
+
+
 //==========================================================
-void InputNode::forwardAction() {}
-void InputNode::backwardAction() {}
+Item::Item()
+    : c_itemListChild()
+    , c_itemListParent()
+    , m_location()
+{
+}
 
-void InputNode::addItem( Item*) {}
-void InputNode::removeItem( Item*) {}
+Item::~Item()
+{
+}
 
+
+void Item::forwardAction() {}
+void Item::backwardAction() {}
+
+
+void Item::addChild( itemPtr_t pItem)
+{
+    c_itemListChild.emplace_back( std::move( pItem));
+}
+
+void Item::addParent( itemPtr_t pItem)
+{
+    c_itemListParent.emplace_back( std::move( pItem));
+}
+
+void Item::removeItem( Item*) { }
+
+ITEM_TYPE Item::getType() { return BASIC_ITEM; }
+
+
+
+
+//==========================================================
 InputNode::InputNode()
-    : c_itemList()
+    : Item()
 {
     LOGWRITE("Create InputNode");
 }
+
 
 InputNode::~InputNode()
 {
@@ -20,20 +52,24 @@ InputNode::~InputNode()
 }
 
 
+void InputNode::forwardAction() {}
+void InputNode::backwardAction() {}
+
+
+void InputNode::removeItem( Item*) {}
+
+
+
+
 
 //=========================================================
-void Synapse::forwardAction() {}
-void Synapse::backwardAction() {}
-
-void Synapse::addItem( Item*) {}
-void Synapse::removeItem( Item*) {}
-
 Synapse::Synapse()
-    : c_itemList()
+    : Item()
     , p_impl( new SynapseImpl())
 {
     LOGWRITE("Create Synapse");
 }
+
 
 Synapse::~Synapse()
 {
@@ -41,20 +77,23 @@ Synapse::~Synapse()
 }
 
 
+void Synapse::forwardAction() {}
+void Synapse::backwardAction() {}
+
+void Synapse::removeItem( Item*) {}
+
+
+
+
 
 //==========================================================
-void Neuron::forwardAction() {}
-void Neuron::backwardAction() {}
-
-void Neuron::addItem( Item*) {}
-void Neuron::removeItem( Item*) {}
-
 Neuron::Neuron()
-    : c_itemList()
+    : Item()
     , p_impl( new NeuronImpl())
 {
     LOGWRITE("Create Neuron");
 }
+
 
 Neuron::~Neuron()
 {
@@ -62,20 +101,25 @@ Neuron::~Neuron()
 }
 
 
+void Neuron::forwardAction() {}
+void Neuron::backwardAction() {}
+
+//void Neuron::addChild( Item*) {}
+//void Neuron::addParent( Item*) {}
+void Neuron::removeItem( Item*) {}
+
+
+
+
 
 //==========================================================
-void BiasNeuron::forwardAction() {}
-void BiasNeuron::backwardAction() {}
-
-void BiasNeuron::addItem( Item*) {}
-void BiasNeuron::removeItem( Item*) {}
-
 BiasNeuron::BiasNeuron()
-    : c_itemList()
+    : Item()
     , p_impl( new BiasNeuronImpl())
 {
     LOGWRITE("Create BiasNeuron");
 }
+
 
 BiasNeuron::~BiasNeuron()
 {
@@ -83,23 +127,63 @@ BiasNeuron::~BiasNeuron()
 }
 
 
+void BiasNeuron::forwardAction() {}
+void BiasNeuron::backwardAction() {}
+
+//void BiasNeuron::addChild( Item*) {}
+//void BiasNeuron::addParent( Item*) {}
+void BiasNeuron::removeItem( Item*) {}
+
+
+
 
 //==========================================================
-void OutputNeuron::forwardAction() {}
-void OutputNeuron::backwardAction() {}
-
-void OutputNeuron::addItem( Item*) {}
-void OutputNeuron::removeItem( Item*) {}
-
 OutputNeuron::OutputNeuron()
-    : c_itemList()
+    : Item()
     , p_impl( new OutputNeuronImpl())
 {
     LOGWRITE("Create OutputNeuron");
 }
 
+
 OutputNeuron::~OutputNeuron()
 {
     LOGWRITE("Delete OutputNeuron");
 }
+
+
+void OutputNeuron::forwardAction() {}
+void OutputNeuron::backwardAction() {}
+
+//void OutputNeuron::addChild( Item*) {}
+//void OutputNeuron::addParent( Item*) {}
+void OutputNeuron::removeItem( Item*) {}
+
+
+
+
+
+
+//==========================================================
+InputNeuron::InputNeuron()
+    : Item()
+    , p_impl( new InputNeuronImpl())
+{
+    LOGWRITE("Create InputNeuron");
+}
+
+
+InputNeuron::~InputNeuron()
+{
+    LOGWRITE("Delete InputNeuron");
+}
+
+
+void InputNeuron::forwardAction() {}
+void InputNeuron::backwardAction() {}
+
+
+void InputNeuron::removeItem( Item*) {}
+
+
 
