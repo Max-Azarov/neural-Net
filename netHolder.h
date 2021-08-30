@@ -11,19 +11,6 @@ namespace Neural {
 
 
 
-
-enum NET_STATE
-{
-    FORWARD_PASS,
-};
-
-
-using inputContainer_t = std::vector<double>;
-using outputContainer_t = std::vector<double>;
-using neuronContainer_t = std::vector<std::vector<Item*>>;
-
-
-
 // ====================================================
 class INetHolder
 {
@@ -32,7 +19,7 @@ public:
     virtual void netState( NET_STATE) {}
     virtual void setInputs( const inputContainer_t&) {}
     virtual void setOutputs( const outputContainer_t&) {}
-    virtual outputContainer_t getOutputs() {}
+    virtual const outputContainer_t& getOutputs() = 0;
 
     INetHolder() {}
     virtual ~INetHolder() {}
@@ -47,7 +34,7 @@ public:
     void netState( NET_STATE) override;
     void setInputs( const inputContainer_t&) override;
     void setOutputs( const outputContainer_t&) override;
-    outputContainer_t getOutputs() override;
+    const outputContainer_t& getOutputs() override;
 
     NetHolder();
     ~NetHolder();
@@ -57,8 +44,11 @@ private:
     void createAndAddSynapses_();
 
 private:
-    itemPtr_t p_node;
+    itemPtr_t p_input_node;
+    itemPtr_t p_out_node;
     neuronContainer_t c_neurons;
+//    outputContainer_t c_outputValue;
+    std::vector<double> c_outputValue;
 };
 
 

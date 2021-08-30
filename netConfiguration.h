@@ -3,24 +3,14 @@
 
 #include <vector>
 
+#include "types.h"
+
 namespace Neural {
 
 
 
 
-enum NET_TYPE
-{
-    FULLY_CONNECTED,
-};
 
-
-
-enum NEURON_TYPE_ACTIVATION
-{
-    NON_TYPE,
-    SIGMOID,
-    RELU,
-};
 
 
 
@@ -41,9 +31,6 @@ struct LayerConfig
         , activationType(act)
     {}
 };
-
-
-using netConfiguration_t = std::vector<LayerConfig>;
 
 
 struct NetConfiguration

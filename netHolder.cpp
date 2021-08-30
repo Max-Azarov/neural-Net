@@ -12,8 +12,10 @@ using namespace Neural;
 
 NetHolder::NetHolder()
     : INetHolder()
-    , p_node ()
+    , p_input_node ( Singleton::instance().createNode())
+    , p_out_node ( Singleton::instance().createNode())
     , c_neurons()
+    , c_outputValue()
 {
 }
 
@@ -26,9 +28,6 @@ NetHolder::~NetHolder()
 
 void NetHolder::createNet( const netConfiguration_t& netConfig)
 {
-    // Создание входного узла сети
-    p_node = Singleton::instance().createInputNode();
-
     // Создание нейронов
     createNeurons_( netConfig);
 
@@ -40,10 +39,13 @@ void NetHolder::createNet( const netConfiguration_t& netConfig)
 void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
 {
     // Вернуть последний вставленный в композицию Item
-    auto pCurrentItem = [] ( const itemPtr_t& node) { return node->getChildList().rbegin()->get(); };
+    auto pCurrentItem = [&] () { return p_input_node->getChildList().rbegin()->get(); };
+
+    // Добавить свойства последнему добавленному нейрону
+    auto addProperty = [&] ( NEURON_TYPE_ACTIVATION activationType) { p_input_node->getChildList().rbegin()->get()->setProperty( &activationType); };
 
     // Добавить последний нейрон композиции в последний существующий слой двумерного контейнера нейронов
-    auto pushBackNeuron = [&] ( const itemPtr_t& node, neuronContainer_t& cont) { cont.rbegin()->emplace_back( pCurrentItem( node)); };
+    auto pushBackNeuron = [&] () { c_neurons.rbegin()->emplace_back( pCurrentItem()); };
 
     // Итератор для перемещения по слоям
     auto itLayer = netConfig.begin();
@@ -52,12 +54,12 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
     c_neurons.emplace_back( std::vector<Item*>());
     for( unsigned int i = 0, end = itLayer->numOfNeuron; i < end; ++i)
     {
-        p_node->addChild( Singleton::instance().createInputNeuron());
-        pushBackNeuron(p_node, c_neurons);
+        p_input_node->addChild( Singleton::instance().createInputNeuron());
+        pushBackNeuron();
     }
     // Нейрон смещения
-    p_node->addChild( Singleton::instance().createBiasNeuron());
-    pushBackNeuron(p_node, c_neurons);
+    p_input_node->addChild( Singleton::instance().createBiasNeuron());
+    pushBackNeuron();
 
     // Создание нейронов скрытых слоев
     for( ++itLayer; itLayer != std::prev(netConfig.end()); ++itLayer)
@@ -65,68 +67,87 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
         c_neurons.emplace_back( std::vector<Item*>());
         for( unsigned int i = 0, end = itLayer->numOfNeuron; i < end; ++i)
         {
-            p_node->addChild( Singleton::instance().createNeuron());
-            pushBackNeuron(p_node, c_neurons);
+            p_input_node->addChild( Singleton::instance().createNeuron());
+            addProperty( itLayer->activationType);
+            pushBackNeuron();
         }
         // Нейрон смещения
-        p_node->addChild( Singleton::instance().createBiasNeuron());
-        pushBackNeuron(p_node, c_neurons);
+        p_input_node->addChild( Singleton::instance().createBiasNeuron());
+        pushBackNeuron();
     }
 
     // Создание выходных нейронов
     c_neurons.emplace_back( std::vector<Item*>());
     for( unsigned int i = 0; i < itLayer->numOfNeuron; ++i)
     {
-        p_node->addChild( Singleton::instance().createOutputNeuron());
-        pushBackNeuron(p_node, c_neurons);
+        p_input_node->addChild( Singleton::instance().createNeuron());
+        addProperty( itLayer->activationType);
+        pushBackNeuron();
+
+        // Добавляем выходной нейрон к узлу на выходе
+        pCurrentItem()->addChild( p_out_node);
+        p_out_node->addParent( *p_input_node->getChildList().rbegin());
     }
+
+    p_input_node->addChild( p_out_node);
 }
 
 
 void NetHolder::createAndAddSynapses_()
 {
-    // Вернуть последний вставленный в композицию Item
-    auto pCurrentItem = [] ( const itemPtr_t& node) { return *node->getChildList().rbegin(); };
+    itemPtr_t synapse;
 
+    // Создание и присоединение синапсов до предпоследнего слоя
     for( unsigned int i = 0, end_i = c_neurons.size() - 2; i < end_i; ++i) {
         for( unsigned int j = 0, end_j = c_neurons[i].size(); j < end_j; ++j) {
             for( unsigned int k = 0, end_k = c_neurons[i + 1].size() - 1; k < end_k; ++k)
             {
                 // Создаем синапс
-                p_node->addChild( Singleton::instance().createSynapse());
+                synapse = Singleton::instance().createSynapse();
 
                 // Присоединяем синапс к нейронам
-                c_neurons[i][j]->addChild( pCurrentItem( p_node));
-                c_neurons[i + 1][k]->addParent( pCurrentItem( p_node));
+                c_neurons[i][j]->addChild( synapse);
+                c_neurons[i + 1][k]->addParent( synapse);
             }
         }
     }
 
+    // Создание и присоединение синапсов последнего слоя
     unsigned int lastLayer = c_neurons.size() - 1;
 
     for( unsigned int j = 0, end_j = c_neurons[lastLayer - 1].size(); j < end_j; ++j) {
         for( unsigned int k = 0, end_k = c_neurons[lastLayer].size(); k < end_k; ++k)
         {
             // Создаем синапс
-            p_node->addChild( Singleton::instance().createSynapse());
+            synapse = Singleton::instance().createSynapse();
 
             // Присоединяем синапс к нейронам
-            c_neurons[lastLayer - 1][j]->addChild( pCurrentItem( p_node));
-            c_neurons[lastLayer][k]->addParent( pCurrentItem( p_node));
+            c_neurons[lastLayer - 1][j]->addChild( synapse);
+            c_neurons[lastLayer][k]->addParent( synapse);
         }
     }
 }
 
 
-void NetHolder::netState( NET_STATE /*netState*/)
+void NetHolder::netState( NET_STATE netState)
 {
-
+    p_input_node->setState( netState);
 }
 
 
-void NetHolder::setInputs( const inputContainer_t& /*inputs*/)
+void NetHolder::setInputs( const inputContainer_t& inputs)
 {
+    // Подаем значения на входы сети
+    auto itLayer = c_neurons.begin();
+    auto itInputs = inputs.begin();
+    std::for_each(itLayer->begin(), itLayer->end(), [&](Item* item)
+    {
+        double temp = *itInputs++;
+        item->input( temp);
+    });
 
+    // Запускаем прямой проход
+    p_input_node->forwardAction();
 }
 
 
@@ -136,19 +157,19 @@ void NetHolder::setOutputs( const outputContainer_t& /*outputs*/)
 }
 
 
-outputContainer_t NetHolder::getOutputs()
+const outputContainer_t& NetHolder::getOutputs()
 {
-    return outputContainer_t();
+    unsigned numOfOutputs = c_neurons.rbegin()->size();
+    if( c_outputValue.size() != numOfOutputs)
+    {
+        c_outputValue.resize( numOfOutputs);
+    }
+
+    std::transform( c_neurons.rbegin()->begin(), c_neurons.rbegin()->end(), c_outputValue.begin(), []( Item* item)
+    {
+        double temp = 0.0;
+        item->output( temp);
+        return temp;
+    });
+    return c_outputValue;
 }
-
-
-//    std::unique_ptr<Synapse> synapse = Singleton::instance().createSynapse();
-//    std::unique_ptr<Neuron> neuron = Singleton::instance().createNeuron();
-//    std::unique_ptr<BiasNeuron> biasNeuron = Singleton::instance().createBiasNeuron();
-//    std::unique_ptr<OutputNeuron> outputNeuron = Singleton::instance().createOutputNeuron();
-//
-//    LOGWRITE_TEXT(synapse->getType());
-//    LOGWRITE_TEXT(neuron->getType());
-//    LOGWRITE_TEXT(biasNeuron->getType());
-//    LOGWRITE_TEXT(outputNeuron->getType());
-//    LOGWRITE_TEXT(InputNode->getType());

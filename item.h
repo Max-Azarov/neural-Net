@@ -8,31 +8,16 @@
 
 #include "logwrite.h"
 #include "itemImpl.h"
+#include "netConfiguration.h"
+#include "types.h"
 
 
 namespace Neural {
 
 
 
-
-enum ITEM_TYPE {
-    BASIC_ITEM,
-    SYNAPSE,
-    NEURON,
-    INPUT_NEURON,
-    OUTPUT_NEURON,
-    BIAS_NEURON,
-    INPUT_NODE,
-};
-
-
 //==========================================================
-class Item;
 
-using itemPtr_t = std::shared_ptr<Item>;
-using itemPtrList_t = std::list<Item*>;
-using itemSmartPtrList_t = std::list<itemPtr_t>;
-using location_t = std::pair<unsigned int, unsigned int>;
 
 
 
@@ -48,8 +33,11 @@ public:
     virtual const itemSmartPtrList_t& getChildList() { return c_itemListChild; }
     virtual const itemSmartPtrList_t& getParentList() { return c_itemListParent; }
     virtual ITEM_TYPE getType();
-    virtual location_t getLocation() { return m_location; }
-    virtual void setLocation( location_t location) { m_location = location; }
+    virtual void* getProperty() const { return nullptr;}
+    virtual void setProperty( void*) {}
+    virtual void setState( NET_STATE);
+    virtual void input( double&) {}
+    virtual void output( double&) {}
 
 public:
     Item();
@@ -58,26 +46,26 @@ public:
 protected:
     itemSmartPtrList_t c_itemListChild;
     itemSmartPtrList_t c_itemListParent;
-    location_t m_location;
+    NET_STATE m_state;
 };
 
 
 
 //==========================================================
-class InputNode : public Item
+class Node : public Item
 {
 public:
-    void forwardAction() override;
+//    void forwardAction() override;
     void backwardAction() override;
 
 //    void addChild( Item*) override;
 //    void addParent( Item*) override;
     void removeItem( Item*) override;
-    ITEM_TYPE getType() override { return INPUT_NODE;}
+    ITEM_TYPE getType() override { return NODE;}
 
 public:
-    InputNode();
-    ~InputNode();
+    Node();
+    ~Node();
 
 private:
 
@@ -89,13 +77,15 @@ private:
 class Synapse : public Item
 {
 public:
-    void forwardAction() override;
+//    void forwardAction() override;
     void backwardAction() override;
 
 //    void addChild( Item*) override;
 //	void addParent( Item*) override;
     void removeItem( Item*) override;
-    ITEM_TYPE getType() override { return SYNAPSE;}
+    ITEM_TYPE getType() override { return SYNAPSE; }
+    void input( double&) override;
+    void output( double&) override;
 
 public:
     Synapse();
@@ -103,6 +93,10 @@ public:
 
 private:
     std::unique_ptr<SynapseImpl> p_impl;
+    double m_input;
+    double m_output;
+
+    friend class SynapseImpl;
 };
 
 
@@ -118,6 +112,10 @@ public:
 //	void addParent( Item*) override;
     void removeItem( Item*) override;
     virtual ITEM_TYPE getType() override { return NEURON;}
+    void setProperty( void*) override;
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
 
 public:
     Neuron();
@@ -125,6 +123,11 @@ public:
 
 private:
     std::unique_ptr<NeuronImpl> p_impl;
+    NEURON_TYPE_ACTIVATION m_typeActivation;
+    double m_input;
+    double m_output;
+
+    friend class NeuronImpl;
 };
 
 
@@ -147,6 +150,7 @@ public:
 
 private:
     std::unique_ptr<BiasNeuronImpl> p_impl;
+    double m_output;
 };
 
 
@@ -155,7 +159,7 @@ private:
 class OutputNeuron : public Item
 {
 public:
-    void forwardAction() override;
+//    void forwardAction() override;
     void backwardAction() override;
 
 //    void addChild( Item*) override;
@@ -163,12 +167,15 @@ public:
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return OUTPUT_NEURON;}
 
+
 public:
     OutputNeuron();
     ~OutputNeuron();
 
 private:
     std::unique_ptr<OutputNeuronImpl> p_impl;
+    double m_input;
+    double m_output;
 };
 
 
@@ -184,6 +191,8 @@ public:
 //	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return INPUT_NEURON;}
+    void input( double&) override;
+    void output( double&) override;
 
 public:
     InputNeuron();
@@ -191,9 +200,11 @@ public:
 
 private:
     std::unique_ptr<InputNeuronImpl> p_impl;
+    double m_input;
 };
 
 
 } // namespace Neural
+
 
 #endif // ITEM_H

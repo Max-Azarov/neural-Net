@@ -1,5 +1,11 @@
 #include "item.h"
 
+#include "algorithm"
+
+
+#include <functional>
+#include <numeric>
+
 
 using namespace Neural;
 
@@ -8,16 +14,31 @@ using namespace Neural;
 Item::Item()
     : c_itemListChild()
     , c_itemListParent()
-    , m_location()
 {
 }
+
 
 Item::~Item()
 {
 }
 
 
-void Item::forwardAction() {}
+void Item::forwardAction()
+{
+//    LOGWRITE(ItemTypeName()(getType()) + ": ");
+//    LOGWRITE_VALUE( this);
+
+    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), []( const itemPtr_t& pItem){ pItem->forwardAction(); });
+//    std::for_each(c_itemListParent.begin(), c_itemListParent.end(), []( const itemPtr_t& pItem){ pItem->forwardAction(); });
+}
+
+
+void Item::setState( NET_STATE state)
+{
+    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), [&]( const itemPtr_t& pItem){ pItem->setState( state); });
+}
+
+
 void Item::backwardAction() {}
 
 
@@ -26,12 +47,15 @@ void Item::addChild( itemPtr_t pItem)
     c_itemListChild.emplace_back( std::move( pItem));
 }
 
+
 void Item::addParent( itemPtr_t pItem)
 {
     c_itemListParent.emplace_back( std::move( pItem));
 }
 
+
 void Item::removeItem( Item*) { }
+
 
 ITEM_TYPE Item::getType() { return BASIC_ITEM; }
 
@@ -39,24 +63,24 @@ ITEM_TYPE Item::getType() { return BASIC_ITEM; }
 
 
 //==========================================================
-InputNode::InputNode()
+Node::Node()
     : Item()
 {
-    LOGWRITE_TEXT("Create InputNode\n");
+    LOGWRITE_TEXT("Create Node\n");
 }
 
 
-InputNode::~InputNode()
+Node::~Node()
 {
-    LOGWRITE_TEXT("Delete InputNode\n");
+    LOGWRITE_TEXT("Delete Node\n");
 }
 
 
-void InputNode::forwardAction() {}
-void InputNode::backwardAction() {}
+//void Node::forwardAction() {}
+void Node::backwardAction() {}
 
 
-void InputNode::removeItem( Item*) {}
+void Node::removeItem( Item*) {}
 
 
 
@@ -65,7 +89,7 @@ void InputNode::removeItem( Item*) {}
 //=========================================================
 Synapse::Synapse()
     : Item()
-    , p_impl( new SynapseImpl())
+    , p_impl( new SynapseImpl( this))
 {
     LOGWRITE_TEXT("Create Synapse: ");
     LOGWRITE_VALUE( this);
@@ -79,19 +103,30 @@ Synapse::~Synapse()
 }
 
 
-void Synapse::forwardAction() {}
+//void Synapse::forwardAction() {}
 void Synapse::backwardAction() {}
 
 void Synapse::removeItem( Item*) {}
 
 
+void Synapse::input( double& input)
+{
+    p_impl->input( input);
+}
+
+
+void Synapse::output( double& output)
+{
+    p_impl->output( output);
+}
 
 
 
 //==========================================================
 Neuron::Neuron()
     : Item()
-    , p_impl( new NeuronImpl())
+    , p_impl( new NeuronImpl( this))
+    , m_typeActivation( SIGMOID)
 {
     LOGWRITE_TEXT("Create Neuron\n");
 }
@@ -103,12 +138,78 @@ Neuron::~Neuron()
 }
 
 
-void Neuron::forwardAction() {}
+void Neuron::setProperty( void* pProperty)
+{
+    if( pProperty == nullptr) {
+        CONSOL_OUT( "pProperty = nullptr");
+        return;
+    }
+    NEURON_TYPE_ACTIVATION* pTypeActivation = static_cast<NEURON_TYPE_ACTIVATION*>(pProperty);
+    m_typeActivation = *pTypeActivation;
+
+    // Выбор типа реализации
+    if( m_typeActivation == SIGMOID) {
+        p_impl.reset( new SigmoidNeuronImpl( this));
+    }
+    else if( m_typeActivation == RELU) {
+        p_impl.reset( new ReLuNeuronImpl( this));
+    }
+    else {
+        p_impl.reset( new NonTypeNeuronImpl( this));
+    }
+}
+
+
+void Neuron::setState( NET_STATE state)
+{
+    if( state == FORWARD) {
+//        m_state = IN_TO_OUT;
+    }
+    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), [&]( const itemPtr_t& pItem){ pItem->setState( state); });
+}
+
+
+void Neuron::forwardAction()
+{
+//    LOGWRITE(ItemTypeName()(getType()) + " " + __func__ + "\n");
+
+    // Вычисляем суммарный сигнал со всех входных синапсов
+    double sum = 0;
+    double tempDouble = 0;
+    sum = std::accumulate( c_itemListParent.begin(), c_itemListParent.end(), 0.0, [&]( double x, const itemPtr_t& pItem)
+    {
+        pItem->output( tempDouble);
+        return x + tempDouble;
+    });
+
+    // Подаем полученное значение на вход нейрона
+    input( sum);
+
+    // Передаем значение выхода в синапсы
+    std::for_each(c_itemListParent.begin(), c_itemListParent.end(), [&]( const itemPtr_t& pItem)
+    {
+        pItem->output( sum);
+    });
+}
+
+
 void Neuron::backwardAction() {}
 
 //void Neuron::addChild( Item*) {}
 //void Neuron::addParent( Item*) {}
 void Neuron::removeItem( Item*) {}
+
+
+void Neuron::input( double& input)
+{
+    p_impl->input( input);
+}
+
+
+void Neuron::output( double& output)
+{
+    p_impl->output( output);
+}
 
 
 
@@ -118,6 +219,7 @@ void Neuron::removeItem( Item*) {}
 BiasNeuron::BiasNeuron()
     : Item()
     , p_impl( new BiasNeuronImpl())
+    , m_output(1.0)
 {
     LOGWRITE_TEXT("Create BiasNeuron\n");
 }
@@ -129,7 +231,13 @@ BiasNeuron::~BiasNeuron()
 }
 
 
-void BiasNeuron::forwardAction() {}
+void BiasNeuron::forwardAction()
+{
+//    LOGWRITE(ItemTypeName()(getType()) + " " + __func__ + "\n");
+
+    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), [&]( const itemPtr_t& pItem){ pItem->input( m_output); });
+}
+
 void BiasNeuron::backwardAction() {}
 
 //void BiasNeuron::addChild( Item*) {}
@@ -154,7 +262,7 @@ OutputNeuron::~OutputNeuron()
 }
 
 
-void OutputNeuron::forwardAction() {}
+//void OutputNeuron::forwardAction() {}
 void OutputNeuron::backwardAction() {}
 
 //void OutputNeuron::addChild( Item*) {}
@@ -181,11 +289,29 @@ InputNeuron::~InputNeuron()
 }
 
 
-void InputNeuron::forwardAction() {}
+void InputNeuron::forwardAction()
+{
+//    LOGWRITE(ItemTypeName()(getType()) + " " + __func__ + "\n");
+    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), [&]( const itemPtr_t& pItem){ pItem->input( m_input); });
+}
+
+
 void InputNeuron::backwardAction() {}
 
 
 void InputNeuron::removeItem( Item*) {}
+
+
+void InputNeuron::input( double& input)
+{
+    m_input = input;
+}
+
+
+void InputNeuron::output( double& output)
+{
+    output = m_input;
+}
 
 
 

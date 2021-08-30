@@ -7,7 +7,8 @@ SOURCES += \
     item.cpp \
     itemImpl.cpp \
     main.cpp \
-    netHolder.cpp
+    netHolder.cpp \
+    strategy.cpp
 
 HEADERS += \
     item.h \
@@ -15,4 +16,6 @@ HEADERS += \
     logwrite.h \
     netConfiguration.h \
     netHolder.h \
-    singleton.h
+    singleton.h \
+    strategy.h \
+    types.h
