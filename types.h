@@ -52,6 +52,8 @@ enum NET_STATE
 };
 
 
+
+
 class Item;
 struct LayerConfig;
 
@@ -66,7 +68,45 @@ using neuronContainer_t = std::vector<std::vector<Item*>>;
 
 
 
+struct LayerConfig
+{
+    unsigned int numOfNeuron;
+    NEURON_TYPE_ACTIVATION activationType;
 
+
+    LayerConfig()
+        : numOfNeuron()
+        , activationType(SIGMOID)
+    {}
+
+
+    LayerConfig( unsigned int num, NEURON_TYPE_ACTIVATION act = SIGMOID)
+        : numOfNeuron(num)
+        , activationType(act)
+    {}
+};
+
+struct NeuronConfig
+{
+    NEURON_TYPE_ACTIVATION activationType;
+    location_t location;
+
+    NeuronConfig( NEURON_TYPE_ACTIVATION act, location_t loc)
+        : activationType( act)
+        , location( loc)
+    {}
+};
+
+
+struct NetConfiguration
+{
+    std::vector<LayerConfig> neuronActivationType; // Определяет количество слоев и тип активации каждого из слоев
+
+
+    NetConfiguration( )
+        : neuronActivationType()
+    {}
+};
 
 
 

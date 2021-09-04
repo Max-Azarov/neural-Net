@@ -19,9 +19,11 @@ class Synapse;
 class SynapseImpl
 {
 public:
-    virtual void setState( ITEM_STATE);
+    virtual void setState( NET_STATE);
     virtual void input( double&);
     virtual void output( double&);
+    virtual void forwardAction() {}
+    virtual void backpropAction() {}
 
 public:
     SynapseImpl( Synapse*);
@@ -33,9 +35,14 @@ private:
     double m_weight;
     double& r_input;
     double& r_output;
+    double m_weightDelta;
+    double m_dWeight;
 
     friend class ForwardSynapseState;
+    friend class BackpropSynapseState;
 };
+
+
 
 
 
@@ -46,25 +53,39 @@ class Neuron;
 class NeuronImpl
 {
 public:
-    virtual void setState( ITEM_STATE) {}
+    virtual void setState( NET_STATE) {}
     virtual void input( double&) {}
     virtual void output( double&) {}
+    virtual void forwardAction() {}
+    virtual void backpropAction() {}
 
 public:
     NeuronImpl( Neuron*);
     virtual ~NeuronImpl();
 
-private:
+protected:
     Neuron* p_owner;
     double& r_input;
     double& r_output;
 
    friend class SigmoidForwardState;
+   friend class SigmoidOutputBackpropState;
+   friend class SigmoidBackpropState;
 };
+
+
+
+
 
 //==========================================================
 class NonTypeNeuronImpl : public NeuronImpl
 {
+public:
+    void setState( NET_STATE) override {}
+    void input( double&) override {}
+    void output( double&) override {}
+    void forwardAction() override {}
+    void backpropAction() override {}
 
 public:
     NonTypeNeuronImpl( Neuron*);
@@ -72,34 +93,119 @@ public:
 
 };
 
+
+
+
+
+
+//==========================================================
+class NonTypeOutputNeuronImpl : public NonTypeNeuronImpl
+{
+public:
+    void setState( NET_STATE) override {}
+    void input( double&) override {}
+    void output( double&) override {}
+    void forwardAction() override {}
+    void backpropAction() override {}
+
+public:
+    NonTypeOutputNeuronImpl( Neuron* owner) : NonTypeNeuronImpl(owner) {}
+    ~NonTypeOutputNeuronImpl() {}
+
+protected:
+//    std::unique_ptr<SigmoidState> p_state;
+};
+
+
+
+
+
 //==========================================================
 class SigmoidNeuronImpl : public NeuronImpl
 {
 public:
-    virtual void setState( ITEM_STATE) {}
-    virtual void input( double&);
-    virtual void output( double&);
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
+    void forwardAction() override;
+    void backpropAction() override;
 
 public:
     SigmoidNeuronImpl( Neuron*);
     ~SigmoidNeuronImpl() {}
 
-private:
+protected:
+    std::unique_ptr<SigmoidState> p_state;
+};
+
+
+
+//==========================================================
+class OutputNeuron;
+//==========================================================
+
+class SigmoidOutputNeuronImpl : public SigmoidNeuronImpl
+{
+public:
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
+//    void forwardAction() override;
+    void backpropAction() override;
+
+public:
+    SigmoidOutputNeuronImpl( OutputNeuron*);
+    ~SigmoidOutputNeuronImpl() {}
+
+protected:
     std::unique_ptr<SigmoidState> p_state;
 
-
+    friend class SigmoidOutputBackpropState;
 };
+
+
+
+
 
 //==========================================================
 class ReLuNeuronImpl : public NeuronImpl
 {
+public:
+    void setState( NET_STATE) override {}
+    void input( double&) override {}
+    void output( double&) override {}
+    void forwardAction() override {}
+    void backpropAction() override {}
 
 public:
-    ReLuNeuronImpl( Neuron*);
+    ReLuNeuronImpl( Neuron* owner) : NeuronImpl(owner){}
     ~ReLuNeuronImpl() {}
 
 };
+
+
+
+
+
+//==========================================================
+class ReLuOutputNeuronImpl : public SigmoidNeuronImpl
+{
+public:
+    void setState( NET_STATE) override {}
+    void input( double&) override {}
+    void output( double&) override {}
+    void forwardAction() override {}
+    void backpropAction() override {}
+
+public:
+    ReLuOutputNeuronImpl( Neuron* owner) : SigmoidNeuronImpl(owner){}
+    ~ReLuOutputNeuronImpl() {}
+
+protected:
+//    std::unique_ptr<SigmoidState> p_state;
+};
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 
 
@@ -119,20 +225,6 @@ private:
 };
 
 
-
-//==========================================================
-class OutputNeuronImpl
-{
-public:
-
-
-public:
-    OutputNeuronImpl();
-    ~OutputNeuronImpl();
-
-private:
-
-};
 
 
 

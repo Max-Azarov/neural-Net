@@ -33,12 +33,27 @@ public:
     itemPtr_t createNode() { return itemPtr_t( new Node()); }
     itemPtr_t createInputNeuron() { return itemPtr_t( new InputNeuron()); }
 
-    double getRandom(double lowerBound, double upperBound) {
+private:
+    std::default_random_engine& getGenerator()
+    {
         static unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-        static std::default_random_engine generator (seed);
-        std::uniform_real_distribution<double> distribution( lowerBound, upperBound);
-        return distribution(generator);
+        static std::default_random_engine generator( seed);
+        return std::ref( generator);
     }
+
+public:
+    double getRandom(double lowerBound, double upperBound)
+    {
+        std::uniform_real_distribution<double> distribution( lowerBound, upperBound);
+        return distribution( getGenerator());
+    }
+
+    double getRandValue( double value)
+    {
+        std::uniform_real_distribution<double> distribution( value * 0.5, value * 2.0);
+        return distribution( getGenerator());
+    }
+
 
 public:
     Singleton( const Singleton&) = delete;
@@ -46,9 +61,9 @@ public:
     Singleton( Singleton&&) = delete;
     void operator= ( Singleton&&) = delete;
 
-    ~Singleton() { LOGWRITE_TEXT("delete Singleton\n"); }
+    ~Singleton() { /*LOGWRITE_TEXT("delete Singleton\n");*/ }
 private:
-    Singleton() { LOGWRITE_TEXT("create Singleton\n"); }
+    Singleton() { /*LOGWRITE_TEXT("create Singleton\n");*/ }
 };
 
 

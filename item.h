@@ -8,7 +8,6 @@
 
 #include "logwrite.h"
 #include "itemImpl.h"
-#include "netConfiguration.h"
 #include "types.h"
 
 
@@ -17,15 +16,12 @@ namespace Neural {
 
 
 //==========================================================
-
-
-
-
 class Item
 {
 public:
+    virtual void show();
     virtual void forwardAction();
-    virtual void backwardAction();
+    virtual void backpropAction();
 
     virtual void addChild( itemPtr_t);
     virtual void addParent( itemPtr_t);
@@ -47,7 +43,10 @@ protected:
     itemSmartPtrList_t c_itemListChild;
     itemSmartPtrList_t c_itemListParent;
     NET_STATE m_state;
+    location_t m_location;
 };
+
+
 
 
 
@@ -56,7 +55,7 @@ class Node : public Item
 {
 public:
 //    void forwardAction() override;
-    void backwardAction() override;
+    void backpropAction() override;
 
 //    void addChild( Item*) override;
 //    void addParent( Item*) override;
@@ -73,17 +72,21 @@ private:
 
 
 
+
+
 //==========================================================
 class Synapse : public Item
 {
 public:
+    void show() override;
 //    void forwardAction() override;
-    void backwardAction() override;
+    void backpropAction() override;
 
 //    void addChild( Item*) override;
 //	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return SYNAPSE; }
+    void setState( NET_STATE) override;
     void input( double&) override;
     void output( double&) override;
 
@@ -101,17 +104,20 @@ private:
 
 
 
+
+
 //==========================================================
 class Neuron : public Item
 {
 public:
+    void show() override;
     void forwardAction() override;
-    void backwardAction() override;
+    void backpropAction() override;
 
 //    void addChild( Item*) override;
 //	void addParent( Item*) override;
     void removeItem( Item*) override;
-    virtual ITEM_TYPE getType() override { return NEURON;}
+    ITEM_TYPE getType() override { return NEURON;}
     void setProperty( void*) override;
     void setState( NET_STATE) override;
     void input( double&) override;
@@ -123,12 +129,52 @@ public:
 
 private:
     std::unique_ptr<NeuronImpl> p_impl;
-    NEURON_TYPE_ACTIVATION m_typeActivation;
+
+protected:
+//    NEURON_TYPE_ACTIVATION m_typeActivation;
     double m_input;
     double m_output;
 
     friend class NeuronImpl;
+    friend class SigmoidNeuronImpl;
+    friend class SigmoidOutputNeuronImpl;
 };
+
+
+
+
+
+//==========================================================
+class OutputNeuron : public Neuron
+{
+public:
+//    void show() override;
+//    void forwardAction() override;
+    void backpropAction() override;
+
+//    void addChild( Item*) override;
+//	void addParent( Item*) override;
+//    void removeItem( Item*) override;
+    ITEM_TYPE getType() override { return OUTPUT_NEURON;}
+    void setProperty( void*) override;
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
+
+public:
+    OutputNeuron();
+    ~OutputNeuron();
+
+private:
+    std::unique_ptr<NeuronImpl> p_impl;
+    double m_idealOutput;
+
+    friend class NeuronImpl;
+    friend class SigmoidOutputNeuronImpl;
+};
+
+
+
 
 
 
@@ -137,7 +183,7 @@ class BiasNeuron : public Item
 {
 public:
     void forwardAction() override;
-    void backwardAction() override;
+    void backpropAction() override;
 
 //    void addChild( Item*) override;
 //	void addParent( Item*) override;
@@ -155,28 +201,6 @@ private:
 
 
 
-//==========================================================
-class OutputNeuron : public Item
-{
-public:
-//    void forwardAction() override;
-    void backwardAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
-    void removeItem( Item*) override;
-    ITEM_TYPE getType() override { return OUTPUT_NEURON;}
-
-
-public:
-    OutputNeuron();
-    ~OutputNeuron();
-
-private:
-    std::unique_ptr<OutputNeuronImpl> p_impl;
-    double m_input;
-    double m_output;
-};
 
 
 
@@ -184,8 +208,9 @@ private:
 class InputNeuron : public Item
 {
 public:
+    void show() override;
     void forwardAction() override;
-    void backwardAction() override;
+    void backpropAction() override;
 
 //    void addChild( Item*) override;
 //	void addParent( Item*) override;

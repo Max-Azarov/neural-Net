@@ -13,9 +13,11 @@ using namespace Neural;
 NetHolder::NetHolder()
     : INetHolder()
     , p_input_node ( Singleton::instance().createNode())
-    , p_out_node ( Singleton::instance().createNode())
+//    , p_out_node ( Singleton::instance().createNode())
     , c_neurons()
+    , c_inputValue()
     , c_outputValue()
+    , p_netHolderState( new NetHolderForwardState( this))
 {
 }
 
@@ -39,16 +41,24 @@ void NetHolder::createNet( const netConfiguration_t& netConfig)
 void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
 {
     // Вернуть последний вставленный в композицию Item
-    auto pCurrentItem = [&] () { return p_input_node->getChildList().rbegin()->get(); };
+    const auto pCurrentItem = [&] () { return p_input_node->getChildList().rbegin()->get(); };
 
     // Добавить свойства последнему добавленному нейрону
-    auto addProperty = [&] ( NEURON_TYPE_ACTIVATION activationType) { p_input_node->getChildList().rbegin()->get()->setProperty( &activationType); };
+//    const auto addProperty = [&] ( NEURON_TYPE_ACTIVATION activationType)
+//    {
+//        p_input_node->getChildList().rbegin()->get()->setProperty( &activationType);
+//    };
+    const auto addProperty = [&] ( NeuronConfig activationType)
+    {
+        p_input_node->getChildList().rbegin()->get()->setProperty( &activationType);
+    };
 
     // Добавить последний нейрон композиции в последний существующий слой двумерного контейнера нейронов
-    auto pushBackNeuron = [&] () { c_neurons.rbegin()->emplace_back( pCurrentItem()); };
+    const auto pushBackNeuron = [&] () { c_neurons.rbegin()->emplace_back( pCurrentItem()); };
 
     // Итератор для перемещения по слоям
     auto itLayer = netConfig.begin();
+    unsigned layer = 0;
 
     // Создание входных нейронов
     c_neurons.emplace_back( std::vector<Item*>());
@@ -62,13 +72,13 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
     pushBackNeuron();
 
     // Создание нейронов скрытых слоев
-    for( ++itLayer; itLayer != std::prev(netConfig.end()); ++itLayer)
+    for( ++itLayer, ++layer; itLayer != std::prev(netConfig.end()); ++itLayer, ++layer)
     {
         c_neurons.emplace_back( std::vector<Item*>());
         for( unsigned int i = 0, end = itLayer->numOfNeuron; i < end; ++i)
         {
             p_input_node->addChild( Singleton::instance().createNeuron());
-            addProperty( itLayer->activationType);
+            addProperty( NeuronConfig( itLayer->activationType, location_t(layer,i)));
             pushBackNeuron();
         }
         // Нейрон смещения
@@ -80,16 +90,20 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
     c_neurons.emplace_back( std::vector<Item*>());
     for( unsigned int i = 0; i < itLayer->numOfNeuron; ++i)
     {
-        p_input_node->addChild( Singleton::instance().createNeuron());
-        addProperty( itLayer->activationType);
+        p_input_node->addChild( Singleton::instance().createOutputNeuron());
+        addProperty( NeuronConfig( itLayer->activationType, location_t(layer,i)));
         pushBackNeuron();
 
         // Добавляем выходной нейрон к узлу на выходе
-        pCurrentItem()->addChild( p_out_node);
-        p_out_node->addParent( *p_input_node->getChildList().rbegin());
+//        pCurrentItem()->addChild( p_out_node);
+//        p_out_node->addParent( *p_input_node->getChildList().rbegin());
     }
 
-    p_input_node->addChild( p_out_node);
+//    p_input_node->addChild( p_out_node);
+
+    // Размеры массивов для входных и выходных значений НС
+    c_inputValue.resize( netConfig.begin()->numOfNeuron);
+    c_outputValue.resize( netConfig.rbegin()->numOfNeuron);
 }
 
 
@@ -129,47 +143,34 @@ void NetHolder::createAndAddSynapses_()
 }
 
 
-void NetHolder::netState( NET_STATE netState)
+void NetHolder::setNetState( NET_STATE netState)
 {
+    if( netState == FORWARD)
+    {
+        p_netHolderState.reset( new NetHolderForwardState( this));
+    }
+    else if( netState == BACKPROP)
+    {
+        p_netHolderState.reset( new NetHolderBackpropState( this));
+    }
+
     p_input_node->setState( netState);
 }
 
 
-void NetHolder::setInputs( const inputContainer_t& inputs)
+inputContainer_t& NetHolder::inputs()
 {
-    // Подаем значения на входы сети
-    auto itLayer = c_neurons.begin();
-    auto itInputs = inputs.begin();
-    std::for_each(itLayer->begin(), itLayer->end(), [&](Item* item)
-    {
-        double temp = *itInputs++;
-        item->input( temp);
-    });
-
-    // Запускаем прямой проход
-    p_input_node->forwardAction();
+    return c_inputValue;
 }
 
 
-void NetHolder::setOutputs( const outputContainer_t& /*outputs*/)
+outputContainer_t& NetHolder::outputs()
 {
-
-}
-
-
-const outputContainer_t& NetHolder::getOutputs()
-{
-    unsigned numOfOutputs = c_neurons.rbegin()->size();
-    if( c_outputValue.size() != numOfOutputs)
-    {
-        c_outputValue.resize( numOfOutputs);
-    }
-
-    std::transform( c_neurons.rbegin()->begin(), c_neurons.rbegin()->end(), c_outputValue.begin(), []( Item* item)
-    {
-        double temp = 0.0;
-        item->output( temp);
-        return temp;
-    });
     return c_outputValue;
+}
+
+
+void NetHolder::run()
+{
+    p_netHolderState->run();
 }

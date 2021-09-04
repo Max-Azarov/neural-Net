@@ -1,8 +1,8 @@
 #ifndef NETHOLDER_H
 #define NETHOLDER_H
 
-#include "netConfiguration.h"
 #include "item.h"
+#include "strategy.h"
 
 #include <memory>
 
@@ -16,10 +16,10 @@ class INetHolder
 {
 public:
     virtual void createNet( const netConfiguration_t&) {}
-    virtual void netState( NET_STATE) {}
-    virtual void setInputs( const inputContainer_t&) {}
-    virtual void setOutputs( const outputContainer_t&) {}
-    virtual const outputContainer_t& getOutputs() = 0;
+    virtual void setNetState( NET_STATE) {}
+    virtual inputContainer_t& inputs() = 0;
+    virtual outputContainer_t& outputs() = 0;
+    virtual void run() = 0;
 
     INetHolder() {}
     virtual ~INetHolder() {}
@@ -31,10 +31,10 @@ class NetHolder : public INetHolder
 {
 public:
     void createNet( const netConfiguration_t&) override;
-    void netState( NET_STATE) override;
-    void setInputs( const inputContainer_t&) override;
-    void setOutputs( const outputContainer_t&) override;
-    const outputContainer_t& getOutputs() override;
+    void setNetState( NET_STATE) override;
+    inputContainer_t& inputs() override;
+    outputContainer_t& outputs() override;
+    void run() override;
 
     NetHolder();
     ~NetHolder();
@@ -45,11 +45,20 @@ private:
 
 private:
     itemPtr_t p_input_node;
-    itemPtr_t p_out_node;
+//    itemPtr_t p_out_node;
     neuronContainer_t c_neurons;
-//    outputContainer_t c_outputValue;
-    std::vector<double> c_outputValue;
+    inputContainer_t c_inputValue;
+    outputContainer_t c_outputValue;
+    std::unique_ptr<NetHolderState> p_netHolderState;
+
+    friend class NetHolderForwardState;
+    friend class NetHolderBackpropState;
 };
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
 
 
 } // namespace Neural
