@@ -133,9 +133,9 @@ void SigmoidNeuronImpl::forwardAction()
 void SigmoidNeuronImpl::backpropAction()
 {
     // Вычисляем суммарное значение весов - дельт синапсов
-    double sum = 0;
+    double delta = 0;
     double tempDouble = 0;
-    sum = std::accumulate( p_owner->c_itemListChild.begin(),
+    delta = std::accumulate( p_owner->c_itemListChild.begin(),
                            p_owner->c_itemListChild.end(),
                            0.0,
                            [&]( double x, const itemPtr_t& pItem)
@@ -145,7 +145,7 @@ void SigmoidNeuronImpl::backpropAction()
     });
 
     // Вычисляем дельта нейрона
-    double delta = sum * (1 - p_owner->m_output) * p_owner->m_output;
+    input( delta);
 
     // Передаем значение дельта в синапсы
     std::for_each( p_owner->c_itemListParent.begin(),
@@ -202,7 +202,138 @@ void SigmoidOutputNeuronImpl::output( double& output)
 }
 
 
-//ReLuNeuronImpl::ReLuNeuronImpl( Neuron* owner) : NeuronImpl( owner) {}
+
+// =================================================================================
+ReLuNeuronImpl::ReLuNeuronImpl( Neuron* owner)
+    : NeuronImpl( owner)
+    , p_state( new ReLuForwardState( this))
+{}
+
+
+void ReLuNeuronImpl::setState( NET_STATE state)
+{
+    if( state == FORWARD)
+    {
+        p_state.reset( new ReLuForwardState( this));
+    }
+    else if( state == BACKPROP)
+    {
+        p_state.reset( new ReLuBackpropState( this));
+    }
+}
+
+
+void ReLuNeuronImpl::input( double& input)
+{
+    p_state->input( input);
+}
+
+
+void ReLuNeuronImpl::output( double& output)
+{
+    p_state->output( output);
+}
+
+
+void ReLuNeuronImpl::forwardAction()
+{
+    // Вычисляем суммарный сигнал со всех входных синапсов
+    double sum = 0;
+    double tempDouble = 0;
+    sum = std::accumulate( p_owner->c_itemListParent.begin(),
+                           p_owner->c_itemListParent.end(),
+                           0.0,
+                           [&]( double x, const itemPtr_t& pItem)
+    {
+        pItem->output( tempDouble);
+        return x + tempDouble;
+    });
+
+    // Подаем полученное значение на вход нейрона
+    input( sum);
+
+    // Передаем значение выхода в синапсы
+    std::for_each( p_owner->c_itemListChild.begin(),
+                   p_owner->c_itemListChild.end(),
+                   [&]( const itemPtr_t& pItem)
+    {
+        output( tempDouble); // Присваиваем tempDouble значение выхода нейрона
+        pItem->input( tempDouble);
+    });
+}
+
+
+void ReLuNeuronImpl::backpropAction()
+{
+    // Вычисляем суммарное значение весов - дельт синапсов
+    double delta = 0;
+    double tempDouble = 0;
+    delta = std::accumulate( p_owner->c_itemListChild.begin(),
+                           p_owner->c_itemListChild.end(),
+                           0.0,
+                           [&]( double x, const itemPtr_t& pItem)
+    {
+        pItem->input( tempDouble);
+        return x + tempDouble;
+    });
+
+    // Вычисляем дельта нейрона
+    input( delta);
+
+    // Передаем значение дельта в синапсы
+    std::for_each( p_owner->c_itemListParent.begin(),
+                   p_owner->c_itemListParent.end(),
+                   [&]( const itemPtr_t& pItem)
+    {
+        pItem->output( delta);
+    });
+}
+
+
+
+//==========================================================
+ReLuOutputNeuronImpl::ReLuOutputNeuronImpl( OutputNeuron* owner)
+    : ReLuNeuronImpl( owner)
+    , p_state( new ReLuForwardState( this))
+{}
+
+
+void ReLuOutputNeuronImpl::setState( NET_STATE state)
+{
+    if( state == FORWARD)
+    {
+        p_state.reset( new ReLuForwardState( this));
+    }
+    else if( state == BACKPROP)
+    {
+        p_state.reset( new ReLuOutputBackpropState( this));
+    }
+}
+
+
+void ReLuOutputNeuronImpl::backpropAction()
+{
+    // Передаем значение дельта в синапсы
+    std::for_each( p_owner->c_itemListParent.begin(),
+                   p_owner->c_itemListParent.end(),
+                   [&]( const itemPtr_t& pItem)
+    {
+        pItem->output( p_state->m_delta);
+    });
+}
+
+
+void ReLuOutputNeuronImpl::input( double& input)
+{
+    p_state->input( input);
+}
+
+
+void ReLuOutputNeuronImpl::output( double& output)
+{
+//    LOGWRITE_TEXT( std::string(__func__) + std::string("\n"));
+    p_state->output( output);
+}
 
 
 

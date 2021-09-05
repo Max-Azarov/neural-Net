@@ -48,11 +48,17 @@ public:
         return distribution( getGenerator());
     }
 
+
     double getRandValue( double value)
     {
         std::uniform_real_distribution<double> distribution( value * 0.5, value * 2.0);
         return distribution( getGenerator());
     }
+
+
+    // Для корректировки весов синапсов
+    double getE() const { return 0.007; }
+    double getA() const { return 0.003; }
 
 
 public:

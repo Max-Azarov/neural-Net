@@ -13,7 +13,6 @@ using namespace Neural;
 NetHolder::NetHolder()
     : INetHolder()
     , p_input_node ( Singleton::instance().createNode())
-//    , p_out_node ( Singleton::instance().createNode())
     , c_neurons()
     , c_inputValue()
     , c_outputValue()
@@ -44,10 +43,6 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
     const auto pCurrentItem = [&] () { return p_input_node->getChildList().rbegin()->get(); };
 
     // Добавить свойства последнему добавленному нейрону
-//    const auto addProperty = [&] ( NEURON_TYPE_ACTIVATION activationType)
-//    {
-//        p_input_node->getChildList().rbegin()->get()->setProperty( &activationType);
-//    };
     const auto addProperty = [&] ( NeuronConfig activationType)
     {
         p_input_node->getChildList().rbegin()->get()->setProperty( &activationType);
@@ -93,13 +88,7 @@ void NetHolder::createNeurons_( const netConfiguration_t& netConfig)
         p_input_node->addChild( Singleton::instance().createOutputNeuron());
         addProperty( NeuronConfig( itLayer->activationType, location_t(layer,i)));
         pushBackNeuron();
-
-        // Добавляем выходной нейрон к узлу на выходе
-//        pCurrentItem()->addChild( p_out_node);
-//        p_out_node->addParent( *p_input_node->getChildList().rbegin());
     }
-
-//    p_input_node->addChild( p_out_node);
 
     // Размеры массивов для входных и выходных значений НС
     c_inputValue.resize( netConfig.begin()->numOfNeuron);

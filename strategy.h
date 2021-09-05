@@ -8,21 +8,20 @@
 
 
 namespace Neural {
-
-
-
-
-// =====================================================================
 class NeuronImpl;
-// =====================================================================
 
+
+
+// =====================================================================
 class SigmoidState
+// =====================================================================
 {
 public:
     virtual void input( double& ) = 0;
     virtual void output( double& ) = 0;
 
 public:
+
     SigmoidState(NeuronImpl* owner);
     virtual ~SigmoidState() {}
 
@@ -36,8 +35,9 @@ protected:
 
 
 
-
+// =====================================================================
 class SigmoidForwardState : public SigmoidState
+// =====================================================================
 {
 public:
     void input( double& ) override;
@@ -63,9 +63,8 @@ public:
 
 
 // =====================================================================
-class SigmoidOutputNeuronImpl;
-// =====================================================================
 class SigmoidOutputBackpropState : public SigmoidState
+// =====================================================================
 {
 public:
     void input( double& ) override;
@@ -81,13 +80,84 @@ private:
 
 
 
+// =====================================================================
+class ReLuState
+// =====================================================================
+{
+public:
+    virtual void input( double& ) = 0;
+    virtual void output( double& ) = 0;
+
+public:
+    ReLuState(NeuronImpl* owner);
+    virtual ~ReLuState() {}
+
+protected:
+    NeuronImpl* p_owner;
+    double m_delta;
+    double m_k;
+
+    friend class ReLuOutputNeuronImpl;
+};
+
+
 
 
 // =====================================================================
+class ReLuForwardState : public ReLuState
+// =====================================================================
+{
+public:
+    void input( double& ) override;
+    void output( double& ) override;
+
+public:
+    ReLuForwardState(NeuronImpl* owner) : ReLuState(owner) {}
+    ~ReLuForwardState() {}
+};
+
+
+
+// =====================================================================
+class ReLuBackpropState : public ReLuState
+// =====================================================================
+{
+public:
+    void input( double& ) override;
+    void output( double& ) override;
+
+public:
+    ReLuBackpropState(NeuronImpl* owner) : ReLuState(owner) {}
+    ~ReLuBackpropState() {}
+};
+
+
+
+// =====================================================================
+class ReLuOutputBackpropState : public ReLuState
+// =====================================================================
+{
+public:
+    void input( double& ) override;
+    void output( double& ) override;
+
+public:
+    ReLuOutputBackpropState(NeuronImpl* owner) : ReLuState( owner), m_idealOutput() {}
+    ~ReLuOutputBackpropState() {}
+
+private:
+    double m_idealOutput;
+};
+
+
+
+
+//
 class SynapseImpl;
-// =====================================================================
 
+// =====================================================================
 class SynapseState
+// =====================================================================
 {
 public:
     virtual void input( double& ) = 0;
@@ -101,7 +171,10 @@ protected:
 };
 
 
+
+// =====================================================================
 class ForwardSynapseState : public SynapseState
+// =====================================================================
 {
 public:
     void input( double& ) override;
@@ -112,7 +185,10 @@ public:
 };
 
 
+
+// =====================================================================
 class BackpropSynapseState : public SynapseState
+// =====================================================================
 {
 public:
     void input( double& ) override;

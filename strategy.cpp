@@ -9,22 +9,12 @@
 using namespace Neural;
 
 
+
+
+
+
 // =====================================================================
 // =====================================================================
-void ForwardSynapseState::input( double& in)
-{
-    p_owner->r_input = in;
-    p_owner->r_output = in * p_owner->m_weight;
-}
-
-
-void ForwardSynapseState::output( double& out)
-{
-    out = p_owner->r_output;
-}
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
 SigmoidState::SigmoidState(NeuronImpl* owner)
     : p_owner(owner)
     , m_delta()
@@ -42,7 +32,6 @@ void SigmoidForwardState::input( double& in)
 
 void SigmoidForwardState::output( double& out)
 {
-//    LOGWRITE_TEXT( std::string(__func__) + std::string("\n"));
     out = p_owner->r_output;
 }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -50,14 +39,143 @@ void SigmoidForwardState::output( double& out)
 
 // =====================================================================
 // =====================================================================
-void SigmoidBackpropState::input( double& in)
+void SigmoidBackpropState::input( double& delta)
 {
-    p_owner->r_input = in;
-    p_owner->r_output = 1.0 / (1.0 + exp(-in));
+    delta = delta * (1 - p_owner->r_output) * p_owner->r_output;
 }
 
 
 void SigmoidBackpropState::output( double& out)
+{
+    out = p_owner->r_output;
+}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+// =====================================================================
+// =====================================================================
+SigmoidOutputBackpropState::SigmoidOutputBackpropState(NeuronImpl* owner)
+    : SigmoidState(owner)
+    , m_idealOutput()
+{}
+
+void SigmoidOutputBackpropState::input( double& delta)
+{
+    delta = m_delta;
+}
+
+
+void SigmoidOutputBackpropState::output( double& out)
+{
+    m_idealOutput = out;
+    double output = p_owner->r_output;
+    m_delta = (m_idealOutput - output) * (1 - output) * output;
+}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+// =====================================================================
+// =====================================================================
+ReLuState::ReLuState(NeuronImpl* owner)
+    : p_owner(owner)
+    , m_delta()
+    , m_k(1.0)
+{}
+
+
+// =====================================================================
+// =====================================================================
+void ReLuForwardState::input( double& in)
+{
+    p_owner->r_input = in;
+
+//    double ratio = m_k;
+    double ratio = Singleton::instance().getRandValue( m_k);
+    if( in > 0)
+    {
+        p_owner->r_output = ratio * in;
+    }
+    else
+    {
+        p_owner->r_output = ratio * 0.1 * in;
+    }
+}
+
+
+void ReLuForwardState::output( double& out)
+{
+    out = p_owner->r_output;
+}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+// =====================================================================
+// =====================================================================
+void ReLuBackpropState::input( double& delta)
+{
+//    double ratio = m_k;
+    double ratio = Singleton::instance().getRandValue( m_k);
+    if( p_owner->r_input > 0)
+    {
+        delta = delta * ratio;
+    }
+    else
+    {
+        delta = delta * ratio * 0.1;
+    }
+}
+
+
+void ReLuBackpropState::output( double& out)
+{
+    out = p_owner->r_output;
+}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+// =====================================================================
+// =====================================================================
+void ReLuOutputBackpropState::input( double& in)
+{
+    in = m_delta;
+}
+
+
+void ReLuOutputBackpropState::output( double& idealOut)
+{
+    m_idealOutput = idealOut;
+    double output = p_owner->r_output;
+
+    double ratio = m_k;
+//    double ratio = Singleton::instance().getRandValue( m_k);
+    if( p_owner->r_input > 0)
+    {
+        m_delta = (m_idealOutput - output) * ratio;
+    }
+    else
+    {
+        m_delta = (m_idealOutput - output) * ratio * 0.1;
+    }
+}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+// =====================================================================
+// =====================================================================
+void ForwardSynapseState::input( double& in)
+{
+    p_owner->r_input = in;
+    p_owner->r_output = in * p_owner->m_weight;
+}
+
+
+void ForwardSynapseState::output( double& out)
 {
     out = p_owner->r_output;
 }
@@ -75,41 +193,13 @@ void BackpropSynapseState::input( double& in)
 
 void BackpropSynapseState::output( double& out)
 {
-//    LOGWRITE_VALUE( out);
-//    LOGWRITE_VALUE( p_owner->r_output);
     double grad = out * p_owner->r_input;
-    double E = Singleton::instance().getRandValue(0.1);
-    double A = Singleton::instance().getRandValue(0.03);
+    double E = Singleton::instance().getRandValue( Singleton::instance().getE());
+    double A = Singleton::instance().getRandValue( Singleton::instance().getA());
     p_owner->m_dWeight = E * grad + A * p_owner->m_dWeight;
+//    p_owner->m_dWeight = Singleton::instance().getE() * grad + Singleton::instance().getA() * p_owner->m_dWeight;
     p_owner->m_weight += p_owner->m_dWeight;
     p_owner->m_weightDelta = p_owner->m_weight * out;
-//    LOGWRITE_VALUE( p_owner->m_weight);
-}
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-
-
-// =====================================================================
-// =====================================================================
-SigmoidOutputBackpropState::SigmoidOutputBackpropState(NeuronImpl* owner)
-    : SigmoidState(owner)
-    , m_idealOutput()
-{}
-
-void SigmoidOutputBackpropState::input( double& in)
-{
-    in = m_delta;
-}
-
-
-void SigmoidOutputBackpropState::output( double& out)
-{
-    m_idealOutput = out;
-    double output = p_owner->r_output;
-    m_delta = (m_idealOutput - output) * (1 - output) * output;
-//    LOGWRITE_VALUE( m_delta);
 }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -153,13 +243,11 @@ void NetHolderForwardState::run()
 // =====================================================
 void NetHolderBackpropState::run()
 {
-//    LOGWRITE_TEXT("Backprop run\n");
     // Подаем идеальные значения на выходы сети
     auto lastLayer = p_owner->c_neurons.rbegin();
     auto itOutputs = p_owner->c_outputValue.begin();
     std::for_each(lastLayer->begin(), lastLayer->end(), [&](Item* item)
     {
-//        LOGWRITE("Test line\n");
         double temp = *itOutputs++;
         item->output( temp);
     });

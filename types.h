@@ -65,6 +65,7 @@ using netConfiguration_t = std::vector<LayerConfig>;
 using inputContainer_t = std::vector<double>;
 using outputContainer_t = std::vector<double>;
 using neuronContainer_t = std::vector<std::vector<Item*>>;
+using coachContainer_t = std::vector< std::vector<double>>;
 
 
 

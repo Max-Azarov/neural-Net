@@ -43,7 +43,6 @@ void Item::setState( NET_STATE state)
 
 void Item::backpropAction()
 {
-//    std::for_each(c_itemListChild.rbegin(), c_itemListChild.rend(), []( const itemPtr_t& pItem){ pItem->backpropAction(); });
 }
 
 
@@ -86,11 +85,6 @@ void Node::backpropAction()
     std::for_each(c_itemListChild.rbegin(), c_itemListChild.rend(), []( const itemPtr_t& pItem){ pItem->backpropAction(); });
 }
 
-
-//void Node::forwardAction() {}
-//void Node::backpropAction() {}
-
-
 void Node::removeItem( Item*) {}
 
 
@@ -122,8 +116,6 @@ void Synapse::show()
     std::for_each(c_itemListChild.begin(), c_itemListChild.end(), []( const itemPtr_t& pItem){ pItem->show(); });
 }
 
-
-//void Synapse::forwardAction() {}
 void Synapse::backpropAction() {}
 
 void Synapse::removeItem( Item*) {}
@@ -152,7 +144,6 @@ void Synapse::output( double& output)
 Neuron::Neuron()
     : Item()
     , p_impl( new SigmoidNeuronImpl( this))
-//    , m_typeActivation( SIGMOID)
 {
 //    LOGWRITE_TEXT("Create Neuron\n");
 }
@@ -181,19 +172,7 @@ void Neuron::setProperty( void* pProperty)
         return;
     }
     NeuronConfig* pConfig = static_cast<NeuronConfig*>(pProperty);
-//    NEURON_TYPE_ACTIVATION* pTypeActivation = static_cast<NEURON_TYPE_ACTIVATION*>(pProperty);
-//    m_typeActivation = *pTypeActivation;
 
-    // Выбор типа реализации
-//    if( *pTypeActivation == SIGMOID) {
-//        p_impl.reset( new SigmoidNeuronImpl( this));
-//    }
-//    else if( *pTypeActivation == RELU) {
-//        p_impl.reset( new ReLuNeuronImpl( this));
-//    }
-//    else {
-//        p_impl.reset( new NonTypeNeuronImpl( this));
-//    }
     // Выбор типа реализации
     if( pConfig->activationType == SIGMOID) {
         p_impl.reset( new SigmoidNeuronImpl( this));
@@ -226,8 +205,6 @@ void Neuron::backpropAction()
     p_impl->backpropAction();
 }
 
-//void Neuron::addChild( Item*) {}
-//void Neuron::addParent( Item*) {}
 void Neuron::removeItem( Item*) {}
 
 
@@ -284,15 +261,6 @@ void OutputNeuron::output( double& output)
 }
 
 
-
-//void OutputNeuron::show()
-//{
-//    LOGWRITE_TEXT( std::to_string(m_location.first) + " " +
-//                   std::to_string(m_location.first) + " " +
-//                   std::to_string(m_output));
-//    std::for_each(c_itemListChild.begin(), c_itemListChild.end(), []( const itemPtr_t& pItem){ pItem->show(); });
-//}
-
 void OutputNeuron::setProperty( void* pProperty)
 {
     if( pProperty == nullptr) {
@@ -343,8 +311,6 @@ void BiasNeuron::forwardAction()
 
 void BiasNeuron::backpropAction() {}
 
-//void BiasNeuron::addChild( Item*) {}
-//void BiasNeuron::addParent( Item*) {}
 void BiasNeuron::removeItem( Item*) {}
 
 

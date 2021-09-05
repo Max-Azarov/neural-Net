@@ -71,6 +71,9 @@ protected:
    friend class SigmoidForwardState;
    friend class SigmoidOutputBackpropState;
    friend class SigmoidBackpropState;
+   friend class ReLuForwardState;
+   friend class ReLuOutputBackpropState;
+   friend class ReLuBackpropState;
 };
 
 
@@ -111,9 +114,6 @@ public:
 public:
     NonTypeOutputNeuronImpl( Neuron* owner) : NonTypeNeuronImpl(owner) {}
     ~NonTypeOutputNeuronImpl() {}
-
-protected:
-//    std::unique_ptr<SigmoidState> p_state;
 };
 
 
@@ -150,7 +150,6 @@ public:
     void setState( NET_STATE) override;
     void input( double&) override;
     void output( double&) override;
-//    void forwardAction() override;
     void backpropAction() override;
 
 public:
@@ -171,16 +170,18 @@ protected:
 class ReLuNeuronImpl : public NeuronImpl
 {
 public:
-    void setState( NET_STATE) override {}
-    void input( double&) override {}
-    void output( double&) override {}
-    void forwardAction() override {}
-    void backpropAction() override {}
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
+    void forwardAction() override;
+    void backpropAction() override;
 
 public:
-    ReLuNeuronImpl( Neuron* owner) : NeuronImpl(owner){}
+    ReLuNeuronImpl( Neuron* owner);
     ~ReLuNeuronImpl() {}
 
+protected:
+    std::unique_ptr<ReLuState> p_state;
 };
 
 
@@ -188,21 +189,22 @@ public:
 
 
 //==========================================================
-class ReLuOutputNeuronImpl : public SigmoidNeuronImpl
+class ReLuOutputNeuronImpl : public ReLuNeuronImpl
 {
 public:
-    void setState( NET_STATE) override {}
-    void input( double&) override {}
-    void output( double&) override {}
-    void forwardAction() override {}
-    void backpropAction() override {}
+    void setState( NET_STATE) override;
+    void input( double&) override;
+    void output( double&) override;
+    void backpropAction() override;
 
 public:
-    ReLuOutputNeuronImpl( Neuron* owner) : SigmoidNeuronImpl(owner){}
+    ReLuOutputNeuronImpl( OutputNeuron* owner);
     ~ReLuOutputNeuronImpl() {}
 
 protected:
-//    std::unique_ptr<SigmoidState> p_state;
+    std::unique_ptr<ReLuState> p_state;
+
+    friend class ReLuOutputBackpropState;
 };
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

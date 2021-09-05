@@ -45,7 +45,6 @@ private:
 
 private:
     itemPtr_t p_input_node;
-//    itemPtr_t p_out_node;
     neuronContainer_t c_neurons;
     inputContainer_t c_inputValue;
     outputContainer_t c_outputValue;

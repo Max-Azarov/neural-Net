@@ -54,11 +54,7 @@ protected:
 class Node : public Item
 {
 public:
-//    void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//    void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return NODE;}
 
@@ -79,11 +75,7 @@ class Synapse : public Item
 {
 public:
     void show() override;
-//    void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return SYNAPSE; }
     void setState( NET_STATE) override;
@@ -113,9 +105,6 @@ public:
     void show() override;
     void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return NEURON;}
     void setProperty( void*) override;
@@ -131,13 +120,14 @@ private:
     std::unique_ptr<NeuronImpl> p_impl;
 
 protected:
-//    NEURON_TYPE_ACTIVATION m_typeActivation;
     double m_input;
     double m_output;
 
     friend class NeuronImpl;
     friend class SigmoidNeuronImpl;
     friend class SigmoidOutputNeuronImpl;
+    friend class ReLuNeuronImpl;
+    friend class ReLuOutputNeuronImpl;
 };
 
 
@@ -148,13 +138,7 @@ protected:
 class OutputNeuron : public Neuron
 {
 public:
-//    void show() override;
-//    void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
-//    void removeItem( Item*) override;
     ITEM_TYPE getType() override { return OUTPUT_NEURON;}
     void setProperty( void*) override;
     void setState( NET_STATE) override;
@@ -171,6 +155,7 @@ private:
 
     friend class NeuronImpl;
     friend class SigmoidOutputNeuronImpl;
+    friend class ReLuOutputNeuronImpl;
 };
 
 
@@ -184,9 +169,6 @@ class BiasNeuron : public Item
 public:
     void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return BIAS_NEURON;}
 
@@ -211,9 +193,6 @@ public:
     void show() override;
     void forwardAction() override;
     void backpropAction() override;
-
-//    void addChild( Item*) override;
-//	void addParent( Item*) override;
     void removeItem( Item*) override;
     ITEM_TYPE getType() override { return INPUT_NEURON;}
     void input( double&) override;
