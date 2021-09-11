@@ -13,6 +13,7 @@ namespace Neural {
 
 // ====================================================
 class INetHolder
+// ====================================================
 {
 public:
     virtual void createNet( const netConfiguration_t&) {}
@@ -28,6 +29,7 @@ public:
 
 // ====================================================
 class NetHolder : public INetHolder
+// ====================================================
 {
 public:
     void createNet( const netConfiguration_t&) override;

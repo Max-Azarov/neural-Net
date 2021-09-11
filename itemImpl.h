@@ -10,13 +10,15 @@
 
 
 namespace Neural {
+class Synapse;
+class Neuron;
+class OutputNeuron;
 
 
 
 //==========================================================
-class Synapse;
-
 class SynapseImpl
+//==========================================================
 {
 public:
     virtual void setState( NET_STATE);
@@ -46,11 +48,10 @@ private:
 
 
 
-// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-// =========================================================
-class Neuron;
 
+//==========================================================
 class NeuronImpl
+//==========================================================
 {
 public:
     virtual void setState( NET_STATE) {}
@@ -82,6 +83,7 @@ protected:
 
 //==========================================================
 class NonTypeNeuronImpl : public NeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override {}
@@ -99,10 +101,9 @@ public:
 
 
 
-
-
 //==========================================================
 class NonTypeOutputNeuronImpl : public NonTypeNeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override {}
@@ -118,10 +119,9 @@ public:
 
 
 
-
-
 //==========================================================
 class SigmoidNeuronImpl : public NeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override;
@@ -140,11 +140,10 @@ protected:
 
 
 
-//==========================================================
-class OutputNeuron;
-//==========================================================
 
+//==========================================================
 class SigmoidOutputNeuronImpl : public SigmoidNeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override;
@@ -168,6 +167,7 @@ protected:
 
 //==========================================================
 class ReLuNeuronImpl : public NeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override;
@@ -190,6 +190,7 @@ protected:
 
 //==========================================================
 class ReLuOutputNeuronImpl : public ReLuNeuronImpl
+//==========================================================
 {
 public:
     void setState( NET_STATE) override;
@@ -214,6 +215,7 @@ protected:
 
 //==========================================================
 class BiasNeuronImpl
+//==========================================================
 {
 public:
 
@@ -232,6 +234,7 @@ private:
 
 //==========================================================
 class InputNeuronImpl
+//==========================================================
 {
 public:
 
